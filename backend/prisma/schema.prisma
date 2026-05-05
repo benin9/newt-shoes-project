@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String    @unique
+  role       UserRole  @default(user)
+  password   String
+  phone      String?
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  bookings   Booking[]
+
+  @@map("users") // Ini penting agar Prisma mencari tabel 'users' (pake s)
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  duration    String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("services")
+}
+
+model Booking {
+  id            Int           @id @default(autoincrement())
+  userId        Int           @map("user_id")
+  service       String        @db.VarChar(100)
+  shoeName      String?       @map("shoe_name")
+  shoeSize      String?       @map("shoe_size")
+  shoeType      String        @map("shoe_type")
+  pickupAddress String        @map("pickup_address") @db.Text
+  pickupDate    DateTime      @map("pickup_date") @db.Date
+  pickupTime    DateTime      @map("pickup_time") @db.Time
+  notes         String?       @db.Text
+  status        BookingStatus @default(pending)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bookings")
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  processing
+  completed
+  cancelled
+}
