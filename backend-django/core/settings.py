@@ -85,19 +85,23 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Mengambil url database production dari Railway
-prod_db = os.environ.get('DATABASE_URL') or os.environ.get('PGURL') or os.environ.get('POSTGRES_URL')
+# Deteksi apakah aplikasi berjalan di dalam server Railway
+IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None or os.environ.get('PORT') is not None
 
-# CEK APAKAH KITA DI SERVER RAILWAY (Ada env DATABASE_URL atau PORT dari Railway)
-IS_PRODUCTION = os.environ.get('DATABASE_URL') is not None or os.environ.get('RAILWAY_STATIC_URL') is not None
-
-if IS_PRODUCTION and prod_db:
+if IS_RAILWAY:
+    # Menggunakan kredensial Postgres Railway yang terpecah secara eksplisit jika URL parsing bermasalah
     DATABASES = {
-        'default': dj_database_url.parse(prod_db, conn_max_age=600)
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('PGDATABASE') or os.environ.get('POSTGRES_DB', 'railway'),
+            'USER': os.environ.get('PGUSER') or os.environ.get('POSTGRES_USER', 'postgres'),
+            'PASSWORD': os.environ.get('PGPASSWORD') or os.environ.get('POSTGRES_PASSWORD'),
+            'HOST': os.environ.get('PGHOST') or os.environ.get('POSTGRES_HOST'),
+            'PORT': os.environ.get('PGPORT') or os.environ.get('POSTGRES_PORT', '5432'),
+        }
     }
-    # Tambahkan backend engine postgres secara manual jika diperlukan
-    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
 else:
+    # Setelan MySQL lokal untuk laptop kamu saat development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
