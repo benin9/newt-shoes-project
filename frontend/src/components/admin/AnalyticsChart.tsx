@@ -87,10 +87,10 @@ export default function AnalyticsChart({ data }: { data: ChartData }) {
               tickMargin={10}
             />
             <YAxis stroke="#9CA3AF" fontSize={12} allowDecimals={false} />
-            <Tooltip
-              contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-              formatter={(value: any) => [`Rp ${value ?? 0}`, "Pendapatan"]}
-              labelFormatter={(label) => new Date(label).toLocaleDateString("id-ID", { dateStyle: 'full' })}
+            <Tooltip 
+              contentStyle={{ borderRadius: "8px", border: "none" }}
+              // Ubah baris formatter menjadi ini:
+              formatter={(value: any) => [`${value ?? 0} Order`, "Jumlah"]}
             />
             <Area
               type="monotone"
