@@ -89,18 +89,28 @@ WSGI_APPLICATION = 'core.wsgi.application'
 IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None or os.environ.get('PORT') is not None
 
 if IS_RAILWAY:
-    # Menggunakan kredensial Postgres Railway secara eksplisit lintas kontainer internal
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('PGDATABASE') or os.environ.get('POSTGRES_DB') or 'railway',
-            'USER': os.environ.get('PGUSER') or os.environ.get('POSTGRES_USER') or 'postgres',
-            # Kita tangkap semua kemungkinan nama variabel password dari Railway
-            'PASSWORD': os.environ.get('PGPASSWORD') or os.environ.get('POSTGRES_PASSWORD') or os.environ.get('PASSWORD'),
-            'HOST': os.environ.get('PGHOST') or os.environ.get('POSTGRES_HOST') or 'postgres.railway.internal',
-            'PORT': os.environ.get('PGPORT') or os.environ.get('POSTGRES_PORT') or '5432',
+    # Mengambil string koneksi penuh yang dijamin disediakan oleh Railway
+    db_url = os.environ.get('DATABASE_URL') or os.environ.get('PGURL') or os.environ.get('POSTGRES_URL')
+    
+    if db_url:
+        # dj_database_url akan otomatis mengurai user, password, host, port, dan db name dari satu URL tersebut
+        DATABASES = {
+            'default': dj_database_url.parse(db_url, conn_max_age=600)
         }
-    }
+        # Siasati agar engine-nya dipaksa menggunakan postgresql bawaan django
+        DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+    else:
+        # Fallback cadangan jika url utama tidak terbaca
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.environ.get('PGDATABASE', 'railway'),
+                'USER': os.environ.get('PGUSER', 'postgres'),
+                'PASSWORD': os.environ.get('PGPASSWORD'),
+                'HOST': 'postgres.railway.internal',
+                'PORT': os.environ.get('PGPORT', '5432'),
+            }
+        }
     
 else:
     # Setelan MySQL lokal untuk laptop kamu saat development
