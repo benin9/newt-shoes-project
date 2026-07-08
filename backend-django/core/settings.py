@@ -183,7 +183,8 @@ LOGGING = {
 
 # Izinkan frontend Next.js (port 3000) untuk mengambil data dari Django
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:3000",  # Supaya laptopmu masih bisa testing
+    "https://newt-shoes-project.vercel.app",  # Ganti dengan domain asli dari Vercel frontend-mu nanti
     "http://localhost:3001",
     "http://localhost:3002",
     "http://localhost:3003",

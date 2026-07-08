@@ -5,13 +5,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { authApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "react-hot-toast";
 
+// Ambil URL Backend secara dinamis dari file .env.local atau dashboard cloud
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function LoginPage() {
   const router = useRouter();
-  const { refreshUser } = useAuth(); // Refresh session jika perlu
+  const { refreshUser } = useAuth(); // Ambil fungsi refresh session jika ada
   
   const [formData, setFormData] = useState({
     email: "",
@@ -25,39 +27,54 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    // FIX 1: Tambahkan blok try di sini
     try {
-      const result = await authApi.login(formData.email, formData.password);
+      // Menembak langsung ke API URL production/lokal secara dinamis
+      const response = await fetch(`${API_URL}/api/auth/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-      if (result.error) {
-        setError(result.error);
-        setLoading(false);
-      } else {
-        // FIX 2: Gunakan (result as any) atau result.data untuk menghindari error TypeScript
-        // Kita gunakan 'any' agar aman jika struktur type-nya belum update
-        const user = (result as any).user || result.data?.user;
-        
-        if (user) {
-            toast.success(`Selamat datang, ${user.name}!`);
+      const result = await response.json();
 
-            // Refresh user context agar aplikasi tahu user sudah login
-            if (refreshUser) refreshUser(); 
-
-            // Cek Role untuk Redirect
-            if (user.role === "admin") {
-                router.push("/admin");
-            } else if (user.role === "courier") {
-                router.push("/delivery");
-            } else {
-                router.push("/booking");
-            }
-        } else {
-            throw new Error("Data user tidak ditemukan.");
-        }
+      if (!response.ok) {
+        throw new Error(result.error || result.message || "Login gagal. Kredensial salah.");
       }
-    } catch (err) {
-      console.error(err);
-      setError("Login gagal. Periksa koneksi atau kredensial.");
+
+      // Jika berhasil, ambil data user-nya
+      const user = result.user || result.data?.user;
+      
+      if (user) {
+        toast.success(`Selamat datang kembali, ${user.name}!`);
+
+        // Simpan token ke localStorage jika backend mengembalikan token jwt/session
+        if (result.token) {
+          localStorage.setItem("token", result.token);
+        }
+
+        // Ambil ulang data session di context global
+        if (refreshUser) refreshUser(); 
+
+        // Pengecekan Role untuk melakukan Redirect halaman
+        if (user.role === "admin") {
+          router.push("/admin");
+        } else if (user.role === "courier" || user.role === "delivery") {
+          router.push("/delivery");
+        } else {
+          router.push("/booking");
+        }
+      } else {
+        throw new Error("Data user tidak ditemukan dalam respons server.");
+      }
+    } catch (err: any) {
+      console.error("Login Error:", err);
+      setError(err.message || "Login gagal. Periksa koneksi internet atau kredensial kamu.");
+      toast.error(err.message || "Login gagal.");
       setLoading(false);
     }
   };
