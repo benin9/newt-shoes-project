@@ -59,7 +59,7 @@ router.patch(
         const { status } = req.body;
         
         // Validasi status yang diperbolehkan
-        const validStatuses = ['pending', 'confirmed', 'processing', 'completed', 'cancelled'];
+        const validStatuses = ['pending', 'confirmed', 'on_pickup', 'processing', 'on_delivery', 'completed', 'cancelled'];
         if (!validStatuses.includes(status)) {
             res.status(400).json({ error: "Invalid status" });
             return;

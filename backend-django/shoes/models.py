@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 class Services(models.Model):
@@ -9,7 +10,7 @@ class Services(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        managed = False  # Jangan biarkan Django mengubah tabel ini
+        managed = getattr(settings, 'TESTING', False)
         db_table = 'services'
     
     def __str__(self):
@@ -18,29 +19,32 @@ class Services(models.Model):
 
 class Bookings(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
-        ('processing', 'Processing'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
+        ('pending', 'Menunggu Pembayaran'),
+        ('confirmed', 'Menunggu Kurir'),
+        ('on_pickup', 'Sedang Dijemput'),
+        ('processing', 'Sedang Diproses'),
+        ('on_delivery', 'Sedang Diantar'),
+        ('completed', 'Selesai'),
+        ('cancelled', 'Dibatalkan'),
     ]
     
     id = models.AutoField(primary_key=True)
     user_id = models.IntegerField()
     service = models.CharField(max_length=100)
-    shoes_name = models.CharField(max_length=255, null=True, blank=True)
-    shoes_kg = models.CharField(max_length=50, null=True, blank=True)
-    shoes_type = models.CharField(max_length=100)
+    shoe_name = models.CharField(max_length=255, null=True, blank=True)
+    shoe_size = models.CharField(max_length=50, null=True, blank=True)
+    shoe_type = models.CharField(max_length=100)
     pickup_address = models.TextField()
     pickup_date = models.DateField()
     pickup_time = models.TimeField()
     notes = models.TextField(null=True, blank=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        managed = False  # Jangan biarkan Django mengubah tabel ini
+        managed = getattr(settings, 'TESTING', False)
         db_table = 'bookings'
     
     def __str__(self):
@@ -51,6 +55,7 @@ class Users(models.Model):
     ROLE_CHOICES = [
         ('user', 'User'),
         ('admin', 'Admin'),
+        ('courier', 'Courier'),
     ]
     
     id = models.AutoField(primary_key=True)
@@ -63,7 +68,7 @@ class Users(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        managed = False  # Jangan biarkan Django mengubah tabel ini
+        managed = getattr(settings, 'TESTING', False)
         db_table = 'users'
     
     def __str__(self):

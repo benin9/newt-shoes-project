@@ -33,14 +33,15 @@ CREATE TABLE IF NOT EXISTS bookings (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   service VARCHAR(100) NOT NULL, -- Menyimpan nama layanan
-  shoes_name VARCHAR(255) DEFAULT NULL, -- Kolom tambahan baru
-  shoes_kg VARCHAR(50) DEFAULT NULL,  -- Kolom tambahan baru
-  shoes_type VARCHAR(100) NOT NULL,
+  shoe_name VARCHAR(255) DEFAULT NULL, -- Nama sepatu yang dibersihkan
+  shoe_size VARCHAR(50) DEFAULT NULL,  -- Ukuran/berat sepatu
+  shoe_type VARCHAR(100) NOT NULL,
   pickup_address TEXT NOT NULL,
   pickup_date DATE NOT NULL,
   pickup_time TIME NOT NULL,
+  total_price DECIMAL(10,2) NOT NULL DEFAULT 0, -- Harga total pembayaran
   notes TEXT,
-  status ENUM('pending', 'confirmed', 'processing', 'completed', 'cancelled') DEFAULT 'pending',
+  status ENUM('pending', 'confirmed', 'on_pickup', 'processing', 'on_delivery', 'completed', 'cancelled') DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

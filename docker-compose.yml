@@ -60,6 +60,25 @@ services:
       - NEXT_PUBLIC_API_URL=http://backend:5000/api
     depends_on:
       - backend
+
+    # 4. BACKEND DJANGO (Port 8000)
+  backend-django:
+    build:
+      context: ./backend-django
+      dockerfile: Dockerfile
+    container_name: django_server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend-django:/app
+    environment:
+      - DB_HOST=db
+      - DB_NAME=newt_shoes
+      - DB_USER=root
+      - DB_PASSWORD=root
+    depends_on:
+      db:
+        condition: service_healthy
       
 volumes:
   db_data:

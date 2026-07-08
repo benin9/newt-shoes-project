@@ -29,7 +29,11 @@ SECRET_KEY = 'django-insecure-j89$67q1y!ef&gwuvolss1h84qfzj^g&r8pfk0)_2%nm6*6mzf
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
+CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'http://localhost:3000'
+]
 
 # Application definition
 
@@ -47,9 +51,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', # Wajib ditaruh paling atas
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

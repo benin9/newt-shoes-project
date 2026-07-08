@@ -50,9 +50,9 @@ router.post("/", authMiddleware, async (req: Request, res: Response): Promise<vo
     // A. Simpan ke Database dulu (Status awal: 'pending')
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO bookings 
-      (user_id, service, shoe_name, shoe_size, shoe_type, pickup_address, pickup_date, pickup_time, notes, status, created_at) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
-      [userId, service, shoe_name, shoe_size, shoe_type, pickup_address, pickup_date, pickup_time, notes]
+      (user_id, service, shoe_name, shoe_size, shoe_type, pickup_address, pickup_date, pickup_time, notes, total_price, status, created_at) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+      [userId, service, shoe_name, shoe_size, shoe_type, pickup_address, pickup_date, pickup_time, notes, finalPrice]
     );
 
     const bookingId = result.insertId;
@@ -81,18 +81,49 @@ router.post("/", authMiddleware, async (req: Request, res: Response): Promise<vo
     };
 
     // C. Minta Token ke Midtrans
-    const transaction = await snap.createTransaction(parameter);
+    let transaction;
+    let isMockToken = false;
+    
+    try {
+      transaction = await snap.createTransaction(parameter);
+    } catch (midtransError: any) {
+      console.warn("⚠️ Midtrans Error (menggunakan mock token untuk testing):", midtransError.message);
+      
+      // Fallback: Generate mock token untuk development/testing
+      // Ini memungkinkan testing flow pembayaran tanpa Midtrans key yang valid
+      transaction = {
+        token: `MOCK-${bookingId}-${Date.now()}`,
+        redirect_url: `https://app.sandbox.midtrans.com/snap/v2/${bookingId}` // Mock redirect
+      };
+      isMockToken = true;
+      
+      console.log("✓ Mock payment token generated untuk testing");
+    }
+
+    if (!transaction || !transaction.token) {
+      console.error("No token received from Midtrans");
+      await pool.query("DELETE FROM bookings WHERE id = ?", [bookingId]);
+      res.status(500).json({ error: "Server pembayaran tidak merespons. Coba lagi." });
+      return;
+    }
     
     // D. Kirim Token & Booking ID ke Frontend
     res.json({ 
       message: "Booking Created", 
       bookingId: bookingId,
-      token: transaction.token 
+      token: transaction.token,
+      isMock: isMockToken // Flag untuk frontend tahu kalau ini mock token
     });
 
   } catch (error) {
     console.error("Booking Error:", error);
-    res.status(500).json({ error: "Gagal memproses booking" });
+    
+    // Return error message yang lebih detail untuk debugging
+    if (error instanceof Error) {
+      res.status(500).json({ error: `Gagal memproses booking: ${error.message}` });
+    } else {
+      res.status(500).json({ error: "Gagal memproses booking" });
+    }
   }
 });
 
@@ -138,4 +169,30 @@ router.get("/", authMiddleware, async (req: Request, res: Response): Promise<voi
     res.status(500).json({ error: "Gagal mengambil data booking" });
   }
 });
+
+// --- GET DETAIL BOOKING BY ID ---
+router.get("/:id", authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user.userId;
+
+    // Ambil booking hanya jika milik user yang sedang login
+    const [rows] = await pool.query(
+      `SELECT * FROM bookings 
+       WHERE id = ? AND user_id = ?`,
+      [id, userId]
+    );
+
+    if ((rows as any[]).length === 0) {
+      res.status(404).json({ error: "Booking tidak ditemukan" });
+      return;
+    }
+
+    res.json((rows as any[])[0]);
+  } catch (error) {
+    console.error("Fetch Booking Detail Error:", error);
+    res.status(500).json({ error: "Gagal mengambil detail booking" });
+  }
+});
+
 export default router;

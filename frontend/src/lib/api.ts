@@ -1,7 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 // --- Tipe Data Response Standar ---
 interface ApiResponse<T = any> {
@@ -36,17 +36,24 @@ api.interceptors.request.use(
 export const authApi = {
   login: async (email: string, password: string): Promise<ApiResponse> => {
     try {
-      const response = await api.post("/auth/login", { email, password });
+      const response = await api.post("/auth/login/", { email, password });
       const data = response.data;
 
       // SIMPAN TOKEN KE COOKIES & LOCALSTORAGE
       if (data.token) {
+        const user = data.user || {
+          id: data.id || 0,
+          name: data.name || data.email || "User",
+          email: data.email,
+          role: data.role || "user",
+        };
+
         Cookies.set("token", data.token, { expires: 7 }); 
-        Cookies.set("user_data", JSON.stringify(data.user), { expires: 7 });
+        Cookies.set("user_data", JSON.stringify(user), { expires: 7 });
         
         if (typeof window !== "undefined") {
           localStorage.setItem("token", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
+          localStorage.setItem("user", JSON.stringify(user));
         }
       }
 
@@ -58,16 +65,23 @@ export const authApi = {
 
   register: async (name: string, email: string, password: string, phone?: string): Promise<ApiResponse> => {
     try {
-      const response = await api.post("/auth/register", { name, email, password, phone });
+      const response = await api.post("/auth/register/", { name, email, password, phone });
       const data = response.data;
 
       if (data.token) {
+        const user = data.user || {
+          id: data.id || 0,
+          name: data.name || data.email || "User",
+          email: data.email,
+          role: data.role || "user",
+        };
+
         Cookies.set("token", data.token, { expires: 7 });
-        Cookies.set("user_data", JSON.stringify(data.user), { expires: 7 });
+        Cookies.set("user_data", JSON.stringify(user), { expires: 7 });
         
         if (typeof window !== "undefined") {
           localStorage.setItem("token", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
+          localStorage.setItem("user", JSON.stringify(user));
         }
       }
 

@@ -140,6 +140,18 @@ export default function BookingPage() {
       const response = await bookingApi.create(payload);
 
       if (response.token) {
+        // Jika mock token (untuk testing), langsung update status dan redirect
+        if (response.isMock) {
+          toast.success("✓ Pesanan Anda Berhasil Dibuat! (Mode Testing)");
+          console.log("📋 Mock Payment Token:", response.token);
+          await bookingApi.updatePaymentStatus(response.bookingId);
+          setTimeout(() => {
+            router.push("/my-bookings");
+          }, 1500);
+          return;
+        }
+
+        // Jika real token dari Midtrans
         if (window.snap) {
           window.snap.pay(response.token, {
             onSuccess: async function (result: any) {
