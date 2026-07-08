@@ -89,15 +89,15 @@ WSGI_APPLICATION = 'core.wsgi.application'
 IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None or os.environ.get('PORT') is not None
 
 if IS_RAILWAY:
-    # Menggunakan kredensial Postgres Railway yang terpecah secara eksplisit jika URL parsing bermasalah
+    # Menggunakan kredensial Postgres Railway secara eksplisit lintas kontainer
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('PGDATABASE') or os.environ.get('POSTGRES_DB', 'railway'),
-            'USER': os.environ.get('PGUSER') or os.environ.get('POSTGRES_USER', 'postgres'),
+            'NAME': os.environ.get('PGDATABASE') or os.environ.get('POSTGRES_DB') or 'railway',
+            'USER': os.environ.get('PGUSER') or os.environ.get('POSTGRES_USER') or 'postgres',
             'PASSWORD': os.environ.get('PGPASSWORD') or os.environ.get('POSTGRES_PASSWORD'),
             'HOST': os.environ.get('PGHOST') or os.environ.get('POSTGRES_HOST'),
-            'PORT': os.environ.get('PGPORT') or os.environ.get('POSTGRES_PORT', '5432'),
+            'PORT': os.environ.get('PGPORT') or os.environ.get('POSTGRES_PORT') or '5432',
         }
     }
 else:
