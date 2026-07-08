@@ -89,16 +89,16 @@ WSGI_APPLICATION = 'core.wsgi.application'
 IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None or os.environ.get('PORT') is not None
 
 if IS_RAILWAY:
-    # Kita hardcode HOST internal network Railway agar tidak mencari local socket Unix
+    # Menggunakan kredensial Postgres Railway secara eksplisit lintas kontainer internal
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('PGDATABASE') or 'railway',
-            'USER': os.environ.get('PGUSER') or 'postgres',
-            'PASSWORD': os.environ.get('PGPASSWORD'),
-            # Jika variabel PGHOST kosong, kita paksa tembak ke alamat internal service database
-            'HOST': os.environ.get('PGHOST') or 'postgres.railway.internal' or 'db.railway.internal',
-            'PORT': os.environ.get('PGPORT') or '5432',
+            'NAME': os.environ.get('PGDATABASE') or os.environ.get('POSTGRES_DB') or 'railway',
+            'USER': os.environ.get('PGUSER') or os.environ.get('POSTGRES_USER') or 'postgres',
+            # Kita tangkap semua kemungkinan nama variabel password dari Railway
+            'PASSWORD': os.environ.get('PGPASSWORD') or os.environ.get('POSTGRES_PASSWORD') or os.environ.get('PASSWORD'),
+            'HOST': os.environ.get('PGHOST') or os.environ.get('POSTGRES_HOST') or 'postgres.railway.internal',
+            'PORT': os.environ.get('PGPORT') or os.environ.get('POSTGRES_PORT') or '5432',
         }
     }
     
