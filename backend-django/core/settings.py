@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import sys
 import dj_database_url
-import os
+import os              # <--- os di-import DI SINI
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -85,17 +85,18 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Membaca variasi nama variabel database yang disediakan oleh Railway
-prod_db = (
-    os.environ.get('DATABASE_URL') or 
-    os.environ.get('PGURL') or 
-    os.environ.get('POSTGRES_URL')
-)
+# Mengambil url database production dari Railway
+prod_db = os.environ.get('DATABASE_URL') or os.environ.get('PGURL') or os.environ.get('POSTGRES_URL')
 
-if prod_db:
+# CEK APAKAH KITA DI SERVER RAILWAY (Ada env DATABASE_URL atau PORT dari Railway)
+IS_PRODUCTION = os.environ.get('DATABASE_URL') is not None or os.environ.get('RAILWAY_STATIC_URL') is not None
+
+if IS_PRODUCTION and prod_db:
     DATABASES = {
         'default': dj_database_url.parse(prod_db, conn_max_age=600)
     }
+    # Tambahkan backend engine postgres secara manual jika diperlukan
+    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
 else:
     DATABASES = {
         'default': {
