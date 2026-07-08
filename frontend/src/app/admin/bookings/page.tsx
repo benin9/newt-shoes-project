@@ -197,7 +197,7 @@ export default function AdminBookingsPage() {
                         <span className="text-xs text-gray-500">Tipe: {booking.shoe_type}</span>
                         {booking.notes && (
                           <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-100 italic mt-1">
-                            "Note: {booking.notes}"
+                            &ldquo;Note:&nbsp;{booking.notes}&rdquo;
                           </span>
                         )}
                       </div>

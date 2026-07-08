@@ -1,7 +1,13 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000/api");
+
+if (process.env.NODE_ENV === "production" && !API_URL) {
+  throw new Error(
+    "Missing NEXT_PUBLIC_API_URL environment variable. Set this in Vercel to your Railway backend URL."
+  );
+}
 
 // --- Tipe Data Response Standar ---
 interface ApiResponse<T = any> {

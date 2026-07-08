@@ -32,7 +32,7 @@ export default function DeliveryDashboard() {
     } else {
       fetchTasks();
     }
-  }, []);
+  }, [router]);
 
   const fetchTasks = async () => {
     try {

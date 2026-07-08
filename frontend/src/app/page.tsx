@@ -358,7 +358,7 @@ export default function HomePage() {
               className="rounded-3xl bg-[#f4efe8] p-8 border border-[#be9020]/30 cursor-pointer"
             >
               <p className="text-sm text-[#5c4a2f]">
-                "Sepatu saya jadi seperti baru lagi. Pelayanan cepat dan profesional!"
+                &ldquo;Sepatu saya jadi seperti baru lagi. Pelayanan cepat dan profesional!&rdquo;
               </p>
               <p className="mt-4 font-semibold text-[#be9020]">Customer {i}</p>
               <div className="mt-2 text-xs text-[#5c4a2f]">

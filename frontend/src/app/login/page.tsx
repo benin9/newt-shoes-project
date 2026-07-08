@@ -6,14 +6,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
+import { authApi } from "@/lib/api";
 import { toast } from "react-hot-toast";
-
-// Ambil URL Backend secara dinamis dari file .env.local atau dashboard cloud
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { refreshUser } = useAuth(); // Ambil fungsi refresh session jika ada
+  const { refreshUser } = useAuth();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -28,39 +26,22 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Menembak langsung ke API URL production/lokal secara dinamis
-      const response = await fetch(`${API_URL}/api/auth/login/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      const result = await authApi.login(formData.email, formData.password);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || result.message || "Login gagal. Kredensial salah.");
+      if (result.error) {
+        throw new Error(result.error);
       }
 
-      // Jika berhasil, ambil data user-nya
-      const user = result.user || result.data?.user;
-      
+      const user = result.data?.user;
+      const token = result.data?.token;
+
+      if (token && refreshUser) {
+        refreshUser();
+      }
+
       if (user) {
         toast.success(`Selamat datang kembali, ${user.name}!`);
 
-        // Simpan token ke localStorage jika backend mengembalikan token jwt/session
-        if (result.token) {
-          localStorage.setItem("token", result.token);
-        }
-
-        // Ambil ulang data session di context global
-        if (refreshUser) refreshUser(); 
-
-        // Pengecekan Role untuk melakukan Redirect halaman
         if (user.role === "admin") {
           router.push("/admin");
         } else if (user.role === "courier" || user.role === "delivery") {
@@ -75,6 +56,7 @@ export default function LoginPage() {
       console.error("Login Error:", err);
       setError(err.message || "Login gagal. Periksa koneksi internet atau kredensial kamu.");
       toast.error(err.message || "Login gagal.");
+    } finally {
       setLoading(false);
     }
   };
@@ -160,7 +142,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-[#5c4a2f]">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/register"
                 className="text-[#be9020] font-semibold hover:underline"

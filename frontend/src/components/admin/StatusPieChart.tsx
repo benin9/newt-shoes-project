@@ -32,7 +32,11 @@ export default function StatusPieChart({ data }: { data: { status: string; total
             ))}
           </Pie>
           <Tooltip 
-            formatter={(value: number) => [`${value} Order`, "Jumlah"]}
+            formatter={(value: any) => {
+              const count = Number(value ?? 0);
+              return `${count} Order`;
+            }}
+            labelFormatter={() => "Jumlah"}
             contentStyle={{ borderRadius: "8px", border: "none" }}
           />
           <Legend verticalAlign="bottom" height={36}/>
