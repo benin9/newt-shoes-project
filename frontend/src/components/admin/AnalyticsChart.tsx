@@ -89,7 +89,7 @@ export default function AnalyticsChart({ data }: { data: ChartData }) {
             <YAxis stroke="#9CA3AF" fontSize={12} allowDecimals={false} />
             <Tooltip
               contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-              formatter={(value: number) => [`${value} Pesanan`, "Total"]}
+              formatter={(value: any) => [`Rp ${value ?? 0}`, "Pendapatan"]}
               labelFormatter={(label) => new Date(label).toLocaleDateString("id-ID", { dateStyle: 'full' })}
             />
             <Area
