@@ -2,12 +2,15 @@ import os
 import dj_database_url
 from pathlib import Path
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Security Settings
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-kunci-rahasia-default-12345')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = ['*']
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -22,9 +25,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', 
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Wajib ada di sini
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -35,7 +38,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 
-# Konfigurasi Template & Database (sesuai punyamu sudah benar)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -54,6 +56,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+# Database
 DATABASES = {
     'default': dj_database_url.config(conn_max_age=600, ssl_require=True) 
     if os.environ.get('DATABASE_URL') 
@@ -67,11 +70,11 @@ DATABASES = {
     }
 }
 
-# --- PENGATURAN STATIC FILES ---
+# Static Files (Optimized for Railway/Whitenoise)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# Ini kunci agar Whitenoise melayani CSS/JS dengan benar
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -81,10 +84,19 @@ STORAGES = {
     },
 }
 
-# Lain-lain
+# CORS & CSRF
 CORS_ALLOW_ALL_ORIGINS = True 
-CSRF_TRUSTED_ORIGINS = ['https://newt-shoes-project.up.railway.app', 'https://newt-shoes-backend.up.railway.app']
+CSRF_TRUSTED_ORIGINS = [
+    'https://newt-shoes-project.up.railway.app', 
+    'https://newt-shoes-backend.up.railway.app'
+]
 
+# Midtrans Configuration (Membaca dari Railway Variables)
+MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY')
+MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY')
+MIDTRANS_IS_PRODUCTION = os.environ.get('MIDTRANS_IS_PRODUCTION') == 'True'
+
+# REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
