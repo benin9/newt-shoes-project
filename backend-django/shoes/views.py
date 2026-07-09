@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core import signing
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .models import Users, Bookings, Services
 
 logger = logging.getLogger(__name__)
@@ -75,6 +76,11 @@ def bookings_view(request):
         return JsonResponse({"message": "Booking sukses", "token": transaction['token']}, status=201)
     except Exception as e:
         return JsonResponse({"error": "Gagal memproses booking"}, status=500)
+
+@api_view(['POST'])
+def token_refresh_view(request):
+    # Logika refresh token Anda di sini
+    return Response({"message": "Token refreshed"})
 
 # --- Utility Endpoints ---
 @api_view(['GET'])
