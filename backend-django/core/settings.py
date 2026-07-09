@@ -67,12 +67,19 @@ DATABASES = {
     }
 }
 
-# STATIC FILES (Hanya satu tempat)
+# --- PENGATURAN STATIC FILES TERBARU ---
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# Pastikan staticfiles storage ini aktif agar CSS dipanggil dengan benar
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Gunakan ini agar Whitenoise melayani file statis dengan benar di Django 4.2+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 # Lain-lain
 CORS_ALLOW_ALL_ORIGINS = True 
 CSRF_TRUSTED_ORIGINS = ['https://newt-shoes-project.up.railway.app', 'https://newt-shoes-backend.up.railway.app']
