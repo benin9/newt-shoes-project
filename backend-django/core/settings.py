@@ -27,13 +27,17 @@ TESTING = 'test' in sys.argv
 SECRET_KEY = 'django-insecure-j89$67q1y!ef&gwuvolss1h84qfzj^g&r8pfk0)_2%nm6*6mzf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://localhost:8080',
+    'https://newt-shoes-project-production.up.railway.app',
+    'https://newt-shoes-backend.up.railway.app'
 ]
 
 # Application definition

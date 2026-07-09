@@ -22,7 +22,7 @@ from rest_framework import status
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.pagination import PageNumberPagination
 
-from .models import Services, Users
+from .models import Services, Users, Bookings
 
 logger = logging.getLogger(__name__)
 
@@ -398,3 +398,242 @@ def post_comment(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+# ==========================================================
+# BOOKINGS ENDPOINTS
+# ==========================================================
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="Mendapatkan semua bookings (admin) atau bookings user tertentu"
+)
+@swagger_auto_schema(
+    method='post',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['service', 'shoe_type', 'pickup_address', 'pickup_date', 'pickup_time', 'total_price'],
+        properties={
+            'service': openapi.Schema(type=openapi.TYPE_STRING, description='Nama layanan'),
+            'shoe_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nama sepatu'),
+            'shoe_size': openapi.Schema(type=openapi.TYPE_STRING, description='Ukuran sepatu'),
+            'shoe_type': openapi.Schema(type=openapi.TYPE_STRING, description='Tipe sepatu'),
+            'pickup_address': openapi.Schema(type=openapi.TYPE_STRING, description='Alamat pengambilan'),
+            'pickup_date': openapi.Schema(type=openapi.TYPE_STRING, description='Tanggal pengambilan (YYYY-MM-DD)'),
+            'pickup_time': openapi.Schema(type=openapi.TYPE_STRING, description='Waktu pengambilan (HH:MM)'),
+            'notes': openapi.Schema(type=openapi.TYPE_STRING, description='Catatan tambahan'),
+            'total_price': openapi.Schema(type=openapi.TYPE_NUMBER, description='Total harga'),
+        },
+    ),
+    operation_description="Membuat booking baru"
+)
+@api_view(['GET', 'POST'])
+@csrf_exempt
+def bookings_view(request):
+    if request.method == 'GET':
+        try:
+            # Coba dapatkan user dari token
+            auth_header = request.headers.get('Authorization')
+            user = None
+            if auth_header:
+                try:
+                    token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+                    payload = signing.loads(token)
+                    user = Users.objects.get(email=payload.get('email'))
+                except Exception:
+                    pass
+            
+            if user and user.role == 'admin':
+                bookings = Bookings.objects.all()
+            elif user:
+                bookings = Bookings.objects.filter(user_id=user.id)
+            else:
+                # Jika tidak login, kembalikan unauthorized
+                return JsonResponse({"detail": "Unauthorized"}, status=401)
+            
+            data = []
+            for b in bookings:
+                data.append({
+                    "id": b.id,
+                    "user_id": b.user_id,
+                    "service": b.service,
+                    "shoe_name": b.shoe_name,
+                    "shoe_size": b.shoe_size,
+                    "shoe_type": b.shoe_type,
+                    "pickup_address": b.pickup_address,
+                    "pickup_date": b.pickup_date.isoformat() if b.pickup_date else None,
+                    "pickup_time": b.pickup_time.isoformat() if b.pickup_time else None,
+                    "notes": b.notes,
+                    "total_price": float(b.total_price) if b.total_price else None,
+                    "status": b.status,
+                    "created_at": b.created_at.isoformat(),
+                    "updated_at": b.updated_at.isoformat()
+                })
+            return JsonResponse(data, safe=False)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    elif request.method == 'POST':
+        try:
+            auth_header = request.headers.get('Authorization')
+            if not auth_header:
+                return JsonResponse({"detail": "Unauthorized"}, status=401)
+            
+            token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+            payload = signing.loads(token)
+            user = Users.objects.get(email=payload.get('email'))
+            
+            data = request.data if isinstance(request.data, dict) else {}
+            
+            booking = Bookings.objects.create(
+                user_id=user.id,
+                service=data.get('service'),
+                shoe_name=data.get('shoe_name'),
+                shoe_size=data.get('shoe_size'),
+                shoe_type=data.get('shoe_type'),
+                pickup_address=data.get('pickup_address'),
+                pickup_date=data.get('pickup_date'),
+                pickup_time=data.get('pickup_time'),
+                notes=data.get('notes'),
+                total_price=data.get('total_price'),
+                status='pending'
+            )
+            
+            return JsonResponse({
+                "message": "Booking created successfully",
+                "bookingId": booking.id,
+                "id": booking.id
+            }, status=201)
+        except Users.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="Mendapatkan booking berdasarkan ID"
+)
+@api_view(['GET'])
+def get_booking_by_id(request, booking_id):
+    try:
+        booking = Bookings.objects.get(id=booking_id)
+        data = {
+            "id": booking.id,
+            "user_id": booking.user_id,
+            "service": booking.service,
+            "shoe_name": booking.shoe_name,
+            "shoe_size": booking.shoe_size,
+            "shoe_type": booking.shoe_type,
+            "pickup_address": booking.pickup_address,
+            "pickup_date": booking.pickup_date.isoformat() if booking.pickup_date else None,
+            "pickup_time": booking.pickup_time.isoformat() if booking.pickup_time else None,
+            "notes": booking.notes,
+            "total_price": float(booking.total_price) if booking.total_price else None,
+            "status": booking.status,
+            "created_at": booking.created_at.isoformat(),
+            "updated_at": booking.updated_at.isoformat()
+        }
+        return JsonResponse(data)
+    except Bookings.DoesNotExist:
+        return JsonResponse({"error": "Booking not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@swagger_auto_schema(
+    method='post',
+    operation_description="Update status pembayaran menjadi success"
+)
+@api_view(['POST'])
+@csrf_exempt
+def update_payment_status(request):
+    try:
+        data = request.data if isinstance(request.data, dict) else {}
+        booking_id = data.get('bookingId')
+        if not booking_id:
+            return JsonResponse({"error": "bookingId is required"}, status=400)
+        
+        booking = Bookings.objects.get(id=booking_id)
+        booking.status = 'confirmed'
+        booking.save()
+        
+        return JsonResponse({"message": "Payment status updated"})
+    except Bookings.DoesNotExist:
+        return JsonResponse({"error": "Booking not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+# ==========================================================
+# ADMIN & COURIER ENDPOINTS
+# ==========================================================
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="Mendapatkan semua user (admin only)"
+)
+@api_view(['GET'])
+def admin_get_users(request):
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return JsonResponse({"detail": "Unauthorized"}, status=401)
+        
+        token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+        payload = signing.loads(token)
+        user = Users.objects.get(email=payload.get('email'))
+        
+        if user.role != 'admin':
+            return JsonResponse({"detail": "Forbidden"}, status=403)
+        
+        users = Users.objects.all()
+        data = []
+        for u in users:
+            data.append({
+                "id": u.id,
+                "name": u.name,
+                "email": u.email,
+                "role": u.role,
+                "phone": u.phone,
+                "created_at": u.created_at.isoformat()
+            })
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@swagger_auto_schema(
+    method='put',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['status'],
+        properties={
+            'status': openapi.Schema(type=openapi.TYPE_STRING, description='Status baru (pending/confirmed/on_pickup/processing/on_delivery/completed/cancelled)'),
+        },
+    ),
+    operation_description="Update status booking (admin/courier)"
+)
+@api_view(['PUT'])
+@csrf_exempt
+def update_booking_status(request, booking_id):
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return JsonResponse({"detail": "Unauthorized"}, status=401)
+        
+        token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+        payload = signing.loads(token)
+        user = Users.objects.get(email=payload.get('email'))
+        
+        if user.role not in ['admin', 'courier']:
+            return JsonResponse({"detail": "Forbidden"}, status=403)
+        
+        data = request.data if isinstance(request.data, dict) else {}
+        booking = Bookings.objects.get(id=booking_id)
+        booking.status = data.get('status', booking.status)
+        booking.save()
+        
+        return JsonResponse({"message": "Booking status updated"})
+    except Bookings.DoesNotExist:
+        return JsonResponse({"error": "Booking not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

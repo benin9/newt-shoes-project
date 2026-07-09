@@ -55,4 +55,14 @@ urlpatterns = [
     path('api/hello-throttled/', views.hello_throttled, name='hello_throttled'),
     # Tambahkan baris ini untuk rute Pagination:
     path('api/courses/', views.get_paginated_courses, name='get_paginated_courses'),
+    
+    # Bookings Endpoints
+    path('api/bookings/', views.bookings_view, name='bookings_view'),
+    path('api/bookings', views.bookings_view, name='bookings_view_no_slash'),
+    path('api/bookings/<int:booking_id>/', views.get_booking_by_id, name='get_booking_by_id'),
+    path('api/bookings/payment-success', views.update_payment_status, name='update_payment_status'),
+    
+    # Admin & Courier Endpoints
+    path('api/admin/users/', views.admin_get_users, name='admin_get_users'),
+    path('api/bookings/<int:booking_id>/status', views.update_booking_status, name='update_booking_status'),
 ]
