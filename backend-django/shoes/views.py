@@ -127,7 +127,7 @@ def admin_get_users(request):
     # Pastikan data dikirim dalam bentuk yang mudah dibaca frontend
     users = list(Users.objects.all().values('id', 'name', 'email', 'role'))
     return JsonResponse({"users": users})
-
+    
 @api_view(['PATCH'])
 def update_booking_status(request, booking_id): return JsonResponse({"message": "OK"})
 
