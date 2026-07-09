@@ -70,6 +70,7 @@ DATABASES = {
 # STATIC FILES (Hanya satu tempat)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Pastikan staticfiles storage ini aktif agar CSS dipanggil dengan benar
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Lain-lain
