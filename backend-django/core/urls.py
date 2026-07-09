@@ -29,41 +29,51 @@ urlpatterns = [
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
-    # API Endpoints dari aplikasi shoes
+    # API Endpoints (Dengan dan tanpa prefix /api)
+    # Stats & Services
     path('api/stats/', views.course_stats, name='course_stats'),
+    path('stats/', views.course_stats, name='course_stats_no_api'),
     path('api/services/', views.get_services, name='get_services'),
+    path('services/', views.get_services, name='get_services_no_api'),
     
-    # Rute auth login yang kompatibel dengan frontend
+    # Auth
     path('api/auth/login/', views.login_view, name='login'),
     path('api/auth/login', views.login_view, name='login_no_slash'),
+    path('auth/login/', views.login_view, name='login_no_api'),
+    path('auth/login', views.login_view, name='login_no_slash_no_api'),
     path('api/auth/sign-in/', views.login_view, name='login_view'),
     path('api-auth/auth/sign-in', views.login_view, name='legacy_sign_in'),
-    
-    # Rute auth lainnya
     path('api/auth/register/', views.register_view, name='register'),
-    path('api/auth/register/', views.register_view, name='register_view'),
+    path('auth/register/', views.register_view, name='register_no_api'),
     path('api/login/', views.login_view, name='legacy_login'),
-    
-    # Rute untuk tugas nomor 4 dan 5 (Tanpa duplikasi)
-    path('api/mycourses/', views.get_my_courses, name='get_my_courses'),
-    path('api/course/<int:course_id>/enroll/', views.course_enroll, name='course_enroll'),
-    path('api/comments/', views.post_comment, name='post_comment'),
-    
-    # Tambahkan baris ini di dalam list urlpatterns Anda:
     path('api/auth/token-refresh', views.token_refresh_view, name='token_refresh'),
+    path('auth/token-refresh', views.token_refresh_view, name='token_refresh_no_api'),
     
-    # Tambahkan baris ini untuk rute Throttling:
+    # Courses & Comments
+    path('api/mycourses/', views.get_my_courses, name='get_my_courses'),
+    path('mycourses/', views.get_my_courses, name='get_my_courses_no_api'),
+    path('api/course/<int:course_id>/enroll/', views.course_enroll, name='course_enroll'),
+    path('course/<int:course_id>/enroll/', views.course_enroll, name='course_enroll_no_api'),
+    path('api/comments/', views.post_comment, name='post_comment'),
+    path('comments/', views.post_comment, name='post_comment_no_api'),
     path('api/hello-throttled/', views.hello_throttled, name='hello_throttled'),
-    # Tambahkan baris ini untuk rute Pagination:
+    path('hello-throttled/', views.hello_throttled, name='hello_throttled_no_api'),
     path('api/courses/', views.get_paginated_courses, name='get_paginated_courses'),
+    path('courses/', views.get_paginated_courses, name='get_paginated_courses_no_api'),
     
-    # Bookings Endpoints
+    # Bookings
     path('api/bookings/', views.bookings_view, name='bookings_view'),
     path('api/bookings', views.bookings_view, name='bookings_view_no_slash'),
+    path('bookings/', views.bookings_view, name='bookings_view_no_api'),
+    path('bookings', views.bookings_view, name='bookings_view_no_slash_no_api'),
     path('api/bookings/<int:booking_id>/', views.get_booking_by_id, name='get_booking_by_id'),
+    path('bookings/<int:booking_id>/', views.get_booking_by_id, name='get_booking_by_id_no_api'),
     path('api/bookings/payment-success', views.update_payment_status, name='update_payment_status'),
+    path('bookings/payment-success', views.update_payment_status, name='update_payment_status_no_api'),
     
-    # Admin & Courier Endpoints
+    # Admin & Courier
     path('api/admin/users/', views.admin_get_users, name='admin_get_users'),
+    path('admin/users/', views.admin_get_users, name='admin_get_users_no_api'),
     path('api/bookings/<int:booking_id>/status', views.update_booking_status, name='update_booking_status'),
+    path('bookings/<int:booking_id>/status', views.update_booking_status, name='update_booking_status_no_api'),
 ]
