@@ -1,11 +1,14 @@
 [build]
-builder = "NIXPACKS"
+builder = "nixpacks"
 
-[build.args]
-NIXPACKS_POETRY_VERSION = ""
+[build.config]
+rootDirectory = "backend-django"
 
 [deploy]
-startCommand = "gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --preload --timeout 300 --access-logfile - --error-logfile -"
+startCommand = "chmod +x start.sh && ./start.sh"
 
 [deploy.config]
 healthcheckPath = "/"
+
+
+
