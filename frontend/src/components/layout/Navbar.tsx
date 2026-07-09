@@ -67,14 +67,16 @@ export function Navbar() {
             Booking
           </Link>
           
-          {/* MENU ADMIN (Hanya muncul jika role = admin) */}
+          {/* MENU ADMIN (Arahkan ke URL Backend) */}
           {isAuthenticated && user?.role === 'admin' && (
-            <Link
-              href="/admin"
+            <a
+              href="https://newt-shoes-backend.up.railway.app/admin"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-red-600 hover:text-red-800 font-bold transition-colors duration-200"
             >
               Admin Dashboard
-            </Link>
+            </a>
           )}
 
           {isAuthenticated && (
@@ -141,123 +143,65 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu - Modern Slide-in */}
+      {/* Mobile Menu */}
       <div
         className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ease-out ${
           isMenuOpen ? "visible" : "invisible"
         }`}
       >
-        {/* Backdrop */}
         <div
           className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${
             isMenuOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={closeMenu}
         />
-
-        {/* Menu Panel */}
         <div
           className={`absolute top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-out ${
             isMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <div className="h-full flex flex-col">
-            {/* Header */}
             <div className="p-6 border-b border-gray-100 bg-white">
               {isAuthenticated ? (
                 <div>
-                  <p className="text-lg font-bold text-[#252527]">
-                    {user?.name}
-                  </p>
+                  <p className="text-lg font-bold text-[#252527]">{user?.name}</p>
                   <p className="text-sm text-[#5c4a2f]">{user?.email}</p>
-                  {/* Label Role di Mobile Menu */}
-                  {user?.role === 'admin' && (
-                    <span className="inline-block mt-1 px-2 py-0.5 text-xs font-bold bg-red-100 text-red-600 rounded">
-                      Admin Access
-                    </span>
-                  )}
                 </div>
               ) : (
-                <span className="text-xl font-extrabold text-[#252527]">
-                  Newt Shoes&Clean
-                </span>
+                <span className="text-xl font-extrabold text-[#252527]">Newt Shoes&Clean</span>
               )}
             </div>
 
-            {/* Navigation Links */}
             <nav className="flex-1 p-6 space-y-4 bg-white">
-              <Link
-                href="/"
-                onClick={closeMenu}
-                className="flex items-center text-lg font-medium text-[#3a2f1c] hover:text-[#be9020] p-3 rounded-lg hover:bg-gray-50 transition-all duration-200"
-              >
-                Home
-              </Link>
-              <Link
-                href="/services"
-                onClick={closeMenu}
-                className="flex items-center text-lg font-medium text-[#3a2f1c] hover:text-[#be9020] p-3 rounded-lg hover:bg-gray-50 transition-all duration-200"
-              >
-                Services
-              </Link>
-              <Link
-                href="/pricing"
-                onClick={closeMenu}
-                className="flex items-center text-lg font-medium text-[#3a2f1c] hover:text-[#be9020] p-3 rounded-lg hover:bg-gray-50 transition-all duration-200"
-              >
-                Pricing
-              </Link>
-              <Link
-                href="/booking"
-                onClick={closeMenu}
-                className="flex items-center text-lg font-medium text-[#3a2f1c] hover:text-[#be9020] p-3 rounded-lg hover:bg-gray-50 transition-all duration-200"
-              >
-                Booking
-              </Link>
+              <Link href="/" onClick={closeMenu} className="block p-3 text-lg font-medium text-[#3a2f1c] hover:bg-gray-50 rounded-lg">Home</Link>
+              <Link href="/services" onClick={closeMenu} className="block p-3 text-lg font-medium text-[#3a2f1c] hover:bg-gray-50 rounded-lg">Services</Link>
+              <Link href="/pricing" onClick={closeMenu} className="block p-3 text-lg font-medium text-[#3a2f1c] hover:bg-gray-50 rounded-lg">Pricing</Link>
+              <Link href="/booking" onClick={closeMenu} className="block p-3 text-lg font-medium text-[#3a2f1c] hover:bg-gray-50 rounded-lg">Booking</Link>
 
               {/* MOBILE ADMIN LINK */}
               {isAuthenticated && user?.role === 'admin' && (
-                <Link
-                  href="/admin"
+                <a
+                  href="https://newt-shoes-backend.up.railway.app/admin"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="flex items-center text-lg font-bold text-red-600 hover:text-red-800 p-3 rounded-lg hover:bg-red-50 transition-all duration-200"
+                  className="block p-3 text-lg font-bold text-red-600 hover:bg-red-50 rounded-lg"
                 >
                   Admin Dashboard
-                </Link>
+                </a>
               )}
 
               {isAuthenticated && (
-                <Link
-                  href="/my-bookings"
-                  onClick={closeMenu}
-                  className="flex items-center text-lg font-medium text-[#3a2f1c] hover:text-[#be9020] p-3 rounded-lg hover:bg-gray-50 transition-all duration-200"
-                >
-                  My Bookings
-                </Link>
+                <Link href="/my-bookings" onClick={closeMenu} className="block p-3 text-lg font-medium text-[#3a2f1c] hover:bg-gray-50 rounded-lg">My Bookings</Link>
               )}
             </nav>
 
-            {/* Footer with Auth Button */}
             <div className="p-6 border-t border-gray-100 bg-white">
               {isAuthenticated ? (
-                <button
-                  onClick={handleLogout}
-                  className="block w-full rounded-xl bg-red-600 px-5 py-3 text-center font-semibold text-white hover:bg-red-700 transition-colors duration-200"
-                >
-                  Logout
-                </button>
+                <button onClick={handleLogout} className="block w-full rounded-xl bg-red-600 py-3 font-semibold text-white">Logout</button>
               ) : (
-                <Link
-                  href="/login"
-                  onClick={closeMenu}
-                  className="block w-full rounded-xl bg-[#252527] px-5 py-3 text-center font-semibold text-white hover:bg-[#be9020] transition-colors duration-200"
-                >
-                  Login
-                </Link>
+                <Link href="/login" onClick={closeMenu} className="block w-full rounded-xl bg-[#252527] py-3 text-center font-semibold text-white">Login</Link>
               )}
-              <p className="mt-4 text-center text-sm text-gray-500">
-                © 2025 Newt Shoes&Clean
-              </p>
             </div>
           </div>
         </div>
