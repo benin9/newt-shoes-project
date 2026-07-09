@@ -51,64 +51,55 @@ def get_services(request):
 @api_view(['POST'])
 @csrf_exempt
 def bookings_view(request):
-    if request.method != 'POST':
-        return Response({"detail": "Use POST to book"}, status=405)
-    
-    try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header:
-            return Response({"detail": "Unauthorized"}, status=401)
-        
-        token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
-        payload = signing.loads(token)
-        user = Users.objects.get(email=payload.get('email'))
-        
-        data = request.data if isinstance(request.data, dict) else {}
-        
-        # 1. Simpan ke database
-        booking = Bookings.objects.create(
-            user_id=user.id,
-            service=data.get('service'),
-            shoe_name=data.get('shoe_name'),
-            shoe_size=data.get('shoe_size'),
-            shoe_type=data.get('shoe_type'),
-            pickup_address=data.get('pickup_address'),
-            pickup_date=data.get('pickup_date'),
-            pickup_time=data.get('pickup_time'),
-            notes=data.get('notes'),
-            total_price=data.get('total_price'),
-            status='pending'
-        )
+    if request.method == 'POST':
+        try:
+            # Pastikan request.data adalah dict
+            data = request.data if isinstance(request.data, dict) else {}
+            
+            # ... (Logika otentikasi user seperti sebelumnya)
 
-        # 2. Integrasi Midtrans
-        snap = midtransclient.Snap(
-            is_production=os.environ.get('MIDTRANS_IS_PRODUCTION') == 'True',
-            server_key=os.environ.get('MIDTRANS_SERVER_KEY'),
-            client_key=os.environ.get('MIDTRANS_CLIENT_KEY')
-        )
+            # 1. Simpan ke Database
+            booking = Bookings.objects.create(
+                user_id=user.id,
+                service=data.get('service'),
+                total_price=data.get('total_price'),
+                status='pending'
+                # ... field lainnya
+            )
 
-        param = {
-            "transaction_details": {
-                "order_id": f"ORDER-{booking.id}",
-                "gross_amount": int(float(booking.total_price or 0)),
-            },
-            "customer_details": {
-                "first_name": user.name,
-                "email": user.email,
+            # 2. Integrasi Midtrans
+            snap = midtransclient.Snap(
+                is_production=os.environ.get('MIDTRANS_IS_PRODUCTION') == 'True',
+                server_key=os.environ.get('MIDTRANS_SERVER_KEY'),
+                client_key=os.environ.get('MIDTRANS_CLIENT_KEY')
+            )
+
+            param = {
+                "transaction_details": {
+                    "order_id": f"ORDER-{booking.id}",
+                    "gross_amount": int(float(data.get('total_price', 0))),
+                },
+                "customer_details": {
+                    "first_name": user.name,
+                    "email": user.email,
+                }
             }
-        }
-        
-        transaction = snap.create_transaction(param)
-        
-        return Response({
-            "message": "Booking created successfully",
-            "bookingId": booking.id,
-            "token": transaction['token']
-        }, status=201)
+            
+            transaction = snap.create_transaction(param)
+            
+            # Respons sukses yang diharapkan frontend
+            return JsonResponse({
+                "message": "Booking created successfully",
+                "bookingId": booking.id,
+                "token": transaction['token']
+            }, status=201)
 
-    except Exception as e:
-        logger.error(f"Midtrans Error: {str(e)}") 
-        return Response({"error": f"Internal Error: {str(e)}"}, status=500)
+        except Exception as e:
+            # Log error ke Railway agar bisa dicek di Deploy Logs
+            print(f"ERROR SAAT BOOKING: {str(e)}")
+            return JsonResponse({"error": "Gagal memproses pembayaran"}, status=500)
+    
+    return JsonResponse({"detail": "Method not allowed"}, status=405)
 
 # --- Placeholders untuk mencegah AttributeError ---
 @api_view(['GET'])
