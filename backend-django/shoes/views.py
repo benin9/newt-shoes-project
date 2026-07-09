@@ -87,6 +87,11 @@ def course_enroll(request, course_id):
     # Tambahkan logika untuk melakukan enroll course di sini
     return Response({"message": f"Successfully enrolled in course {course_id}"})
 
+@api_view(['POST'])
+def post_comment(request):
+    # Tambahkan logika untuk menyimpan komentar di sini
+    return Response({"message": "Comment posted successfully"})
+
 # --- Utility Endpoints ---
 @api_view(['GET'])
 def get_services(request): 
