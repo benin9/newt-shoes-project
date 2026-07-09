@@ -20,5 +20,5 @@ COPY . .
 # Jalankan migrasi dan init users, lalu start server
 CMD python manage.py migrate --noinput && \
     python manage.py shell -c "exec(open('init_users.py').read())" && \
-    exec gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    exec python manage.py runserver 0.0.0.0:$PORT
 
