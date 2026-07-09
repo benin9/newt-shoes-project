@@ -67,11 +67,11 @@ DATABASES = {
     }
 }
 
-# Pastikan ini benar
+# --- PENGATURAN STATIC FILES ---
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Gunakan ini untuk Django 4.2+
+# Ini kunci agar Whitenoise melayani CSS/JS dengan benar
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
