@@ -82,6 +82,11 @@ def token_refresh_view(request):
     # Logika refresh token Anda di sini
     return Response({"message": "Token refreshed"})
 
+@api_view(['POST'])
+def course_enroll(request, course_id):
+    # Tambahkan logika untuk melakukan enroll course di sini
+    return Response({"message": f"Successfully enrolled in course {course_id}"})
+
 # --- Utility Endpoints ---
 @api_view(['GET'])
 def get_services(request): 
