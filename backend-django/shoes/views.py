@@ -1,7 +1,7 @@
 import json
 import bcrypt
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponse
 from django.db.models import Avg, Max, Min, Count
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
@@ -25,6 +25,16 @@ from rest_framework.pagination import PageNumberPagination
 from .models import Services, Users, Bookings
 
 logger = logging.getLogger(__name__)
+
+# Root route view
+def root_view(request):
+    return JsonResponse({
+        "message": "Newt Shoes API is running!",
+        "docs": "/docs/",
+        "redoc": "/redoc/",
+        "status": "success"
+    })
+
 
 
 def verify_password(raw_password, stored_hash):

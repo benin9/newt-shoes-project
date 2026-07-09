@@ -22,6 +22,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('', views.root_view, name='root'),
     path('admin/', admin.site.urls),
     
     # Swagger Documentation Endpoints
