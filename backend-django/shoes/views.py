@@ -46,9 +46,9 @@ def root_view(request):
 # Di dalam shoes/views.py
 
 @api_view(['GET'])
-def course_stats(request):
-    # Tambahkan logika perhitungan statistik Anda di sini
-    return Response({"message": "Data statistik berhasil diambil"})
+def get_services(request):
+    services = Services.objects.all().values() # Sesuaikan logika ini dengan model Anda
+    return Response({"services": list(services)})
 
 @api_view(['POST'])
 @csrf_exempt
