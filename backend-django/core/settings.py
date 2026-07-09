@@ -2,15 +2,12 @@ import os
 import dj_database_url
 from pathlib import Path
 
-# Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 1. SECURITY SETTINGS
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-kunci-rahasia-default-12345')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['newt-shoes-backend.up.railway.app', 'localhost', '127.0.0.1']
 
-# 2. APPLICATION DEFINITION
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,7 +24,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # <--- TARUH DI SINI
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -36,13 +33,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Konfigurasi Whitenoise
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 ROOT_URLCONF = 'core.urls'
 
-# PERBAIKAN ERROR admin.E403: Konfigurasi TEMPLATES wajib ada
+# Konfigurasi Template & Database (sesuai punyamu sudah benar)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -61,35 +54,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# 3. DATABASE CONFIGURATION
-if os.environ.get('DATABASE_URL'):
-    DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+DATABASES = {
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True) 
+    if os.environ.get('DATABASE_URL') 
+    else {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'newt_shoes',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'newt_shoes',
-            'USER': 'root',
-            'PASSWORD': 'root',
-            'HOST': '127.0.0.1',
-            'PORT': '3306',
-        }
-    }
+}
 
-# 4. CORS & CSRF
-CORS_ALLOW_ALL_ORIGINS = True 
-CSRF_TRUSTED_ORIGINS = [
-    'https://newt-shoes-project.up.railway.app', 
-    'https://newt-shoes-backend.up.railway.app',
-]
-
-# 5. STATIC FILES
-STATIC_URL = 'static/'
+# STATIC FILES (Hanya satu tempat)
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# 6. REST FRAMEWORK
+# Lain-lain
+CORS_ALLOW_ALL_ORIGINS = True 
+CSRF_TRUSTED_ORIGINS = ['https://newt-shoes-project.up.railway.app', 'https://newt-shoes-backend.up.railway.app']
+
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
