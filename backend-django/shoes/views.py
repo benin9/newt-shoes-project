@@ -41,18 +41,23 @@ def login_view(request):
         user = Users.objects.filter(email__iexact=email).first()
 
         if user:
-            # Periksa apakah password tersimpan sudah dalam format hash yang benar
-            try:
+            # 1. Cek apakah password adalah hash bcrypt (dimulai dengan $2)
+            if user.password.startswith('$2'):
                 if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                    token = signing.dumps({"email": user.email})
-                    return JsonResponse({
-                        "message": "Login berhasil",
-                        "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role},
-                        "token": token
-                    }, status=200)
-            except ValueError:
-                # Jika terjadi error "Invalid salt", berarti hash di database tidak valid
-                return JsonResponse({"error": "Format password tidak valid, harap reset password"}, status=400)
+                    is_valid = True
+                else:
+                    is_valid = False
+            # 2. Cek apakah password adalah plaintext (dari Django Admin)
+            else:
+                is_valid = (password == user.password)
+
+            if is_valid:
+                token = signing.dumps({"email": user.email})
+                return JsonResponse({
+                    "message": "Login berhasil",
+                    "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role},
+                    "token": token
+                }, status=200)
         
         return JsonResponse({"error": "Email atau password salah"}, status=401)
     except Exception as e:
