@@ -10,7 +10,6 @@ class Services(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        managed = getattr(settings, 'TESTING', False)
         db_table = 'services'
     
     def __str__(self):
@@ -44,7 +43,6 @@ class Bookings(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        managed = getattr(settings, 'TESTING', False)
         db_table = 'bookings'
     
     def __str__(self):
@@ -68,7 +66,6 @@ class Users(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        managed = getattr(settings, 'TESTING', False)
         db_table = 'users'
     
     def __str__(self):
