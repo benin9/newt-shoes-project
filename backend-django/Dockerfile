@@ -18,8 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Jalankan migrasi dan init users, lalu start server
-CMD python manage.py makemigrations --noinput && \
-    python manage.py migrate --noinput && \
+CMD python manage.py migrate --noinput && \
     python manage.py shell -c "exec(open('init_users.py').read())" && \
-    exec python manage.py runserver 0.0.0.0:$PORT
+    exec gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120
 

@@ -27,7 +27,7 @@ TESTING = 'test' in sys.argv
 SECRET_KEY = 'django-insecure-j89$67q1y!ef&gwuvolss1h84qfzj^g&r8pfk0)_2%nm6*6mzf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
