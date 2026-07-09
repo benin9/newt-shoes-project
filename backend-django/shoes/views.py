@@ -43,6 +43,13 @@ class CustomPagination(PageNumberPagination):
 def root_view(request):
     return JsonResponse({"message": "Newt Shoes API is running!", "status": "success"})
 
+# Di dalam shoes/views.py
+
+@api_view(['GET'])
+def course_stats(request):
+    # Tambahkan logika perhitungan statistik Anda di sini
+    return Response({"message": "Data statistik berhasil diambil"})
+
 @api_view(['POST'])
 @csrf_exempt
 def bookings_view(request):
