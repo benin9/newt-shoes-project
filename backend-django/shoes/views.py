@@ -105,7 +105,9 @@ def bookings_view(request):
             }, status=201)
 
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-
+            # Gunakan logging untuk melihat error di tab Logs Railway
+            logger.error(f"Midtrans Error: {str(e)}") 
+            return JsonResponse({"error": f"Internal Error: {str(e)}"}, status=500)
+            
 # Catatan: Fungsi lainnya (register_view, login_view, dll) 
 # tetap Anda pertahankan di bawah fungsi bookings_view ini.
