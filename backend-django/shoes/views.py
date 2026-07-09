@@ -112,7 +112,9 @@ def root_view(request): return JsonResponse({"message": "API running", "status":
 def hello_throttled(request): return JsonResponse({"message": "OK"})
 
 @api_view(['GET'])
-def get_paginated_courses(request): return JsonResponse({"courses": []})
+def get_paginated_courses(request): 
+    # Kirim setidaknya object kosong bukan list kosong jika frontend mengharapkan object
+    return JsonResponse({"courses": [], "total": 0})
 
 @api_view(['GET'])
 def get_booking_by_id(request, booking_id): return JsonResponse({"booking": booking_id})
@@ -121,7 +123,10 @@ def get_booking_by_id(request, booking_id): return JsonResponse({"booking": book
 def update_payment_status(request): return JsonResponse({"message": "OK"})
 
 @api_view(['GET'])
-def admin_get_users(request): return JsonResponse({"users": []})
+def admin_get_users(request): 
+    # Pastikan data dikirim dalam bentuk yang mudah dibaca frontend
+    users = list(Users.objects.all().values('id', 'name', 'email', 'role'))
+    return JsonResponse({"users": users})
 
 @api_view(['PATCH'])
 def update_booking_status(request, booking_id): return JsonResponse({"message": "OK"})
