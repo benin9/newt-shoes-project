@@ -36,14 +36,24 @@ def register_view(request):
 def login_view(request):
     try:
         data = request.data
-        user = Users.objects.filter(email__iexact=data.get('email', '').lower()).first()
-        if user and verify_password(data.get('password'), user.password):
-            token = signing.dumps({"email": user.email})
-            return JsonResponse({
-                "message": "Login berhasil",
-                "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role},
-                "token": token
-            }, status=200)
+        email = data.get('email', '').lower()
+        password = data.get('password', '')
+        user = Users.objects.filter(email__iexact=email).first()
+
+        if user:
+            # Periksa apakah password tersimpan sudah dalam format hash yang benar
+            try:
+                if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+                    token = signing.dumps({"email": user.email})
+                    return JsonResponse({
+                        "message": "Login berhasil",
+                        "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role},
+                        "token": token
+                    }, status=200)
+            except ValueError:
+                # Jika terjadi error "Invalid salt", berarti hash di database tidak valid
+                return JsonResponse({"error": "Format password tidak valid, harap reset password"}, status=400)
+        
         return JsonResponse({"error": "Email atau password salah"}, status=401)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
