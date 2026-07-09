@@ -102,3 +102,6 @@ def update_booking_status(request, booking_id): return Response({"message": "OK"
 def login_view(request): return Response({"message": "OK"})
 @api_view(['POST'])
 def register_view(request): return Response({"message": "OK"})
+@api_view(['GET'])
+def root_view(request):
+    return JsonResponse({"message": "Newt Shoes API is running!", "status": "success"})
