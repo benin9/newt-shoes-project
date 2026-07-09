@@ -31,7 +31,7 @@ urlpatterns = [
 
     # API Endpoints (Dengan dan tanpa prefix /api)
     # Stats & Services
-    path('api/stats/', views.course_stats, name='course_stats'),
+    # path('api/stats/', views.course_stats, name='course_stats'),
     path('stats/', views.course_stats, name='course_stats_no_api'),
     path('api/services/', views.get_services, name='get_services'),
     path('services/', views.get_services, name='get_services_no_api'),
