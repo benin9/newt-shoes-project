@@ -41,13 +41,8 @@ def login_view(request):
         user = Users.objects.filter(email__iexact=email).first()
 
         if user:
-            # 1. Cek apakah password adalah hash bcrypt (dimulai dengan $2)
             if user.password.startswith('$2'):
-                if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                    is_valid = True
-                else:
-                    is_valid = False
-            # 2. Cek apakah password adalah plaintext (dari Django Admin)
+                is_valid = bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8'))
             else:
                 is_valid = (password == user.password)
 
@@ -63,28 +58,25 @@ def login_view(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-# --- Booking Endpoint ---
-<<<<<<< HEAD
-@api_view(['GET', 'POST']) # Tambahkan 'GET' di sini
+# --- Booking Endpoint (Gabungan GET & POST) ---
+@api_view(['GET', 'POST'])
 @csrf_exempt
 def bookings_view(request):
     try:
-        # 1. Menangani GET: Mengambil daftar booking user
+        token = request.headers.get('Authorization', '').replace('Bearer ', '')
+        if not token:
+            return JsonResponse({"error": "Token tidak ditemukan"}, status=401)
+            
+        payload = signing.loads(token)
+        user = Users.objects.get(email__iexact=payload.get('email'))
+        
+        # 1. Menangani GET
         if request.method == 'GET':
-            token = request.headers.get('Authorization', '').replace('Bearer ', '')
-            payload = signing.loads(token)
-            user = Users.objects.get(email__iexact=payload.get('email'))
-            
-            # Ambil semua booking milik user tersebut
-            user_bookings = Bookings.objects.filter(user_id=user.id).values()
-            return JsonResponse({"bookings": list(user_bookings)}, status=200)
+            user_bookings = list(Bookings.objects.filter(user_id=user.id).values())
+            return JsonResponse({"bookings": user_bookings}, status=200)
 
-        # 2. Menangani POST: Membuat booking baru (kode asli Anda)
+        # 2. Menangani POST
         if request.method == 'POST':
-            token = request.headers.get('Authorization', '').replace('Bearer ', '')
-            payload = signing.loads(token)
-            user = Users.objects.get(email__iexact=payload.get('email'))
-            
             data = request.data
             booking = Bookings.objects.create(
                 user_id=user.id, service=data.get('service'), 
@@ -105,37 +97,8 @@ def bookings_view(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-=======
-@api_view(['POST'])
-@csrf_exempt
-def bookings_view(request):
-    try:
-        token = request.headers.get('Authorization', '').replace('Bearer ', '')
-        payload = signing.loads(token)
-        user = Users.objects.get(email__iexact=payload.get('email'))
-        
-        data = request.data
-        booking = Bookings.objects.create(
-            user_id=user.id, service=data.get('service'), 
-            total_price=data.get('total_price'), status='pending'
-        )
-        
-        import midtransclient
-        snap = midtransclient.Snap(
-            is_production=os.environ.get('MIDTRANS_IS_PRODUCTION') == 'True',
-            server_key=os.environ.get('MIDTRANS_SERVER_KEY'),
-            client_key=os.environ.get('MIDTRANS_CLIENT_KEY')
-        )
-        transaction = snap.create_transaction({
-            "transaction_details": {"order_id": f"ORDER-{booking.id}", "gross_amount": int(float(data.get('total_price', 0)))},
-            "customer_details": {"first_name": user.name, "email": user.email}
-        })
-        return JsonResponse({"message": "Booking sukses", "token": transaction['token']}, status=201)
-    except Exception as e:
-        return JsonResponse({"error": "Gagal memproses booking"}, status=500)
->>>>>>> 30e01891e008c52fbde9746b3d6a7227648b383c
 
-# --- Semua Endpoint (Diberi Dekorator agar tidak error) ---
+# --- Endpoint Lainnya ---
 @api_view(['POST'])
 def token_refresh_view(request): return Response({"message": "OK"})
 
@@ -155,9 +118,7 @@ def root_view(request): return JsonResponse({"message": "API running", "status":
 def hello_throttled(request): return JsonResponse({"message": "OK"})
 
 @api_view(['GET'])
-def get_paginated_courses(request): 
-    # Kirim setidaknya object kosong bukan list kosong jika frontend mengharapkan object
-    return JsonResponse({"courses": [], "total": 0})
+def get_paginated_courses(request): return JsonResponse({"courses": [], "total": 0})
 
 @api_view(['GET'])
 def get_booking_by_id(request, booking_id): return JsonResponse({"booking": booking_id})
@@ -167,7 +128,6 @@ def update_payment_status(request): return JsonResponse({"message": "OK"})
 
 @api_view(['GET'])
 def admin_get_users(request): 
-    # Pastikan data dikirim dalam bentuk yang mudah dibaca frontend
     users = list(Users.objects.all().values('id', 'name', 'email', 'role'))
     return JsonResponse({"users": users})
     
