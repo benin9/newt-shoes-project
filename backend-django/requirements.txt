@@ -16,4 +16,4 @@ tzdata==2026.2
 uritemplate==4.2.0
 gunicorn==21.2.0
 whitenoise==6.7.0
-midtransclient
+midtransclient==2.0.0
