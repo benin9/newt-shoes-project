@@ -64,6 +64,7 @@ def login_view(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 # --- Booking Endpoint ---
+<<<<<<< HEAD
 @api_view(['GET', 'POST']) # Tambahkan 'GET' di sini
 @csrf_exempt
 def bookings_view(request):
@@ -104,6 +105,35 @@ def bookings_view(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+=======
+@api_view(['POST'])
+@csrf_exempt
+def bookings_view(request):
+    try:
+        token = request.headers.get('Authorization', '').replace('Bearer ', '')
+        payload = signing.loads(token)
+        user = Users.objects.get(email__iexact=payload.get('email'))
+        
+        data = request.data
+        booking = Bookings.objects.create(
+            user_id=user.id, service=data.get('service'), 
+            total_price=data.get('total_price'), status='pending'
+        )
+        
+        import midtransclient
+        snap = midtransclient.Snap(
+            is_production=os.environ.get('MIDTRANS_IS_PRODUCTION') == 'True',
+            server_key=os.environ.get('MIDTRANS_SERVER_KEY'),
+            client_key=os.environ.get('MIDTRANS_CLIENT_KEY')
+        )
+        transaction = snap.create_transaction({
+            "transaction_details": {"order_id": f"ORDER-{booking.id}", "gross_amount": int(float(data.get('total_price', 0)))},
+            "customer_details": {"first_name": user.name, "email": user.email}
+        })
+        return JsonResponse({"message": "Booking sukses", "token": transaction['token']}, status=201)
+    except Exception as e:
+        return JsonResponse({"error": "Gagal memproses booking"}, status=500)
+>>>>>>> 30e01891e008c52fbde9746b3d6a7227648b383c
 
 # --- Semua Endpoint (Diberi Dekorator agar tidak error) ---
 @api_view(['POST'])

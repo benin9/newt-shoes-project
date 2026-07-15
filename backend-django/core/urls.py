@@ -63,10 +63,20 @@ urlpatterns = [
     
     # Bookings
     path('api/bookings/', views.bookings_view, name='bookings_view'),
+<<<<<<< HEAD
     path('api/bookings/', views.bookings_view, name='bookings_view'),
     path('api/bookings', views.bookings_view, name='bookings_view_no_slash'),
     path('bookings/', views.bookings_view, name='bookings_view_no_api'),
     path('bookings', views.bookings_view, name='bookings_view_no_slash_no_api'),
+=======
+    path('api/bookings', views.bookings_view, name='bookings_view_no_slash'),
+    path('bookings/', views.bookings_view, name='bookings_view_no_api'),
+    path('bookings', views.bookings_view, name='bookings_view_no_slash_no_api'),
+    path('api/bookings/<int:booking_id>/', views.get_booking_by_id, name='get_booking_by_id'),
+    path('bookings/<int:booking_id>/', views.get_booking_by_id, name='get_booking_by_id_no_api'),
+    path('api/bookings/payment-success', views.update_payment_status, name='update_payment_status'),
+    path('bookings/payment-success', views.update_payment_status, name='update_payment_status_no_api'),
+>>>>>>> 30e01891e008c52fbde9746b3d6a7227648b383c
     
     # Admin & Courier
     path('api/admin/users/', views.admin_get_users, name='admin_get_users'),
