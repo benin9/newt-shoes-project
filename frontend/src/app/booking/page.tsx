@@ -60,8 +60,10 @@ export default function BookingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F9F8F6] flex flex-col md:flex-row font-sans text-[#393E46]">
-       {/* UI Anda tetap di sini, pastikan gunakan form dan button submit yang memanggil handleSubmit */}
-    </div>
-  );
+  <div className="min-h-screen flex items-center justify-center">
+    <h1 className="text-4xl font-bold text-red-500">
+      Booking Page
+    </h1>
+  </div>
+);
 }
