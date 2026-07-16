@@ -139,41 +139,48 @@ export default function BookingPage() {
     try {
       const response = await bookingApi.create(payload);
 
-      if (response.token) {
-        if (window.snap) {
-          window.snap.pay(response.token, {
-            onSuccess: async function (result: any) {
-              toast.success("Pembayaran Berhasil! Pesanan diproses.");
-              await bookingApi.updatePaymentStatus(response.bookingId);
-              router.push("/my-bookings");
-            },
-            onPending: function (result: any) {
-              toast("Menunggu pembayaran...", { icon: "⏳" });
-              router.push("/my-bookings");
-            },
-            onError: function (result: any) {
-              toast.error("Pembayaran Gagal.");
-              setLoading(false);
-            },
-            onClose: function () {
-              toast.error("Kamu menutup pembayaran.");
-              setLoading(false);
-            },
-          });
-        } else {
-          toast.error("Script pembayaran belum siap. Refresh halaman.");
-          setLoading(false);
-        }
-      } else {
-        throw new Error("Gagal mendapatkan token pembayaran");
-      }
+console.log("BOOKING RESPONSE =", response);
 
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "Terjadi kesalahan sistem");
-      setLoading(false);
-    }
-  };
+if (response.error) {
+  toast.error(response.error);
+  console.error(response.error);
+  setLoading(false);
+  return;
+}
+
+if (!response.token) {
+  toast.error("Token Midtrans tidak ada");
+  console.log(response);
+  setLoading(false);
+  return;
+}
+
+window.snap.pay(response.token, {
+  onSuccess: async () => {
+    toast.success("Pembayaran Berhasil!");
+    await bookingApi.updatePaymentStatus(response.bookingId);
+    router.push("/my-bookings");
+  },
+  onPending: () => {
+    toast("Menunggu pembayaran...", { icon: "⏳" });
+    router.push("/my-bookings");
+  },
+  onError: () => {
+    toast.error("Pembayaran gagal");
+    setLoading(false);
+  },
+  onClose: () => {
+    toast.error("Pembayaran dibatalkan");
+    setLoading(false);
+  },
+});
+
+} catch (error: any) {
+  console.error(error);
+  toast.error(error.message || "Booking gagal");
+  setLoading(false);
+}
+};
 
   return (
     // CONTAINER UTAMA: Full Cream (#F9F8F6) & Full Height (Split Screen)
@@ -438,5 +445,5 @@ export default function BookingPage() {
         </div>
       </motion.div>
     </div>
-  );
-}
+  )
+    }
