@@ -66,8 +66,13 @@ export default function BookingPage() {
   useEffect(() => {
     const initBookingData = async () => {
       try {
-        const data = await servicesApi.getAll(); 
-        setServices(data);
+        const data = await servicesApi.getAll();
+
+if (Array.isArray(data)) {
+  setServices(data);
+} else {
+  setServices([]);
+}
 
         if (serviceFromUrl) {
           const preSelected = data.find((s: ServiceData) => s.name === serviceFromUrl);

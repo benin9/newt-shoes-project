@@ -1,13 +1,10 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000/api");
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-if (process.env.NODE_ENV === "production" && !API_URL) {
-  throw new Error(
-    "Missing NEXT_PUBLIC_API_URL environment variable. Set this to your Railway backend URL."
-  );
-}
+console.log("API_URL =", API_URL);
 
 // --- Tipe Data Response Standar ---
 interface ApiResponse<T = any> {
@@ -174,19 +171,16 @@ updatePaymentStatus: async (bookingId: number) => {
 
 // --- 4. SERVICES API (Public & Admin) ---
 export const servicesApi = {
-  // GET ALL: Endpoint Public (Tanpa Login)
   getAll: async () => {
     try {
-      const res = await api.get("/services"); 
-      return res.data;
+      const res = await api.get("/services");
+      return res.data.services || [];
     } catch (error: any) {
-      // Jika error 404/Network, kembalikan array kosong agar tidak crash
       console.error("Service fetch error", error);
       return [];
     }
   },
 
-  // ADMIN: Create
   create: async (data: any) => {
     try {
       const res = await api.post("/admin/services", data);
@@ -196,7 +190,6 @@ export const servicesApi = {
     }
   },
 
-  // ADMIN: Update
   update: async (id: number, data: any) => {
     try {
       const res = await api.put(`/admin/services/${id}`, data);
@@ -206,7 +199,6 @@ export const servicesApi = {
     }
   },
 
-  // ADMIN: Delete
   delete: async (id: number) => {
     try {
       const res = await api.delete(`/admin/services/${id}`);
