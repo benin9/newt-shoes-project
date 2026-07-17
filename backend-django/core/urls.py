@@ -1,8 +1,19 @@
 from django.contrib import admin
 from django.urls import path
 from shoes import views 
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 # ... (simpan bagian schema_view Anda di sini)
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Newt Shoes API",
+      default_version='v1',
+   ),
+   public=True,
+   # Tambahkan baris di bawah ini untuk memaksa HTTPS:
+   url='https://newt-shoes-backend.up.railway.app', 
+)
 
 urlpatterns = [
     path('', views.root_view, name='root'),
