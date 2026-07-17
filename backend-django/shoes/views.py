@@ -7,7 +7,8 @@ from django.core import signing
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.response import Response
-from .models import Users, Bookings, Services
+from .models import Users, Bookings, Servic
+from rest_framework.throttling import UserRateThrottlees
 
 logger = logging.getLogger(__name__)
 
@@ -119,8 +120,9 @@ def root_view(request): return JsonResponse({"message": "API running", "status":
 
 # --- Throttled Endpoint ---
 @api_view(['GET'])
-@throttle_classes([FiveRequestsPerMinuteThrottle])
-def hello_throttled(request): return JsonResponse({"message": "OK"})
+@throttle_classes([UserRateThrottle]) 
+def hello_throttled(request): 
+    return JsonResponse({"message": "OK"})
 
 @api_view(['GET'])
 def get_paginated_courses(request): return JsonResponse({"courses": [], "total": 0})

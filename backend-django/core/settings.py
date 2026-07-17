@@ -96,19 +96,20 @@ MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY')
 MIDTRANS_IS_PRODUCTION = os.environ.get('MIDTRANS_IS_PRODUCTION') == 'True'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 5,
-    
-    # BAGIAN INI WAJIB ADA agar throttle berfungsi secara global 
-    # atau dikenali oleh DRF:
+    # ... konfigurasi lain
     'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',
-        'user': '1000/day',
-        'five_per_minute': '5/min', # Pastikan nama scope di sini SAMA dengan di views.py
+        'user': '5/min',  # Ubah menjadi 5/min agar langsung terasa
+    }
+}
+
+# Tambahkan ini agar throttling bisa menyimpan data hitungan request
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 
