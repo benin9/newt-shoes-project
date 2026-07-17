@@ -99,6 +99,16 @@ MIDTRANS_IS_PRODUCTION = os.environ.get('MIDTRANS_IS_PRODUCTION') == 'True'
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
+    # Tambahkan bagian throttling di bawah ini:
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day',
+        'five_per_minute': '5/min',  # Ini adalah rate limit untuk 5x per menit
+    }
 }
 
 LANGUAGE_CODE = 'en-us'

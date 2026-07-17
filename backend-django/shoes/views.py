@@ -4,11 +4,16 @@ import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core import signing
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.response import Response
 from .models import Users, Bookings, Services
 
 logger = logging.getLogger(__name__)
+
+# --- Throttle Configuration ---
+class FiveRequestsPerMinuteThrottle(UserRateThrottle):
+    scope = 'five_per_minute'
 
 # --- Helper ---
 def verify_password(raw_password, stored_hash):
@@ -58,7 +63,7 @@ def login_view(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-# --- Booking Endpoint (Gabungan GET & POST) ---
+# --- Booking Endpoint ---
 @api_view(['GET', 'POST'])
 @csrf_exempt
 def bookings_view(request):
@@ -70,12 +75,10 @@ def bookings_view(request):
         payload = signing.loads(token)
         user = Users.objects.get(email__iexact=payload.get('email'))
         
-        # 1. Menangani GET
         if request.method == 'GET':
             user_bookings = list(Bookings.objects.filter(user_id=user.id).values())
             return JsonResponse({"bookings": user_bookings}, status=200)
 
-        # 2. Menangani POST
         if request.method == 'POST':
             data = request.data
             booking = Bookings.objects.create(
@@ -114,7 +117,9 @@ def get_services(request): return JsonResponse({"services": list(Services.object
 @api_view(['GET'])
 def root_view(request): return JsonResponse({"message": "API running", "status": "success"})
 
+# --- Throttled Endpoint ---
 @api_view(['GET'])
+@throttle_classes([FiveRequestsPerMinuteThrottle])
 def hello_throttled(request): return JsonResponse({"message": "OK"})
 
 @api_view(['GET'])
