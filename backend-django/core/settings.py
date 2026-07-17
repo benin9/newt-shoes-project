@@ -95,11 +95,12 @@ MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY')
 MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY')
 MIDTRANS_IS_PRODUCTION = os.environ.get('MIDTRANS_IS_PRODUCTION') == 'True'
 
-# REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
-    # Tambahkan bagian throttling di bawah ini:
+    
+    # BAGIAN INI WAJIB ADA agar throttle berfungsi secara global 
+    # atau dikenali oleh DRF:
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
@@ -107,7 +108,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/day',
         'user': '1000/day',
-        'five_per_minute': '5/min',  # Ini adalah rate limit untuk 5x per menit
+        'five_per_minute': '5/min', # Pastikan nama scope di sini SAMA dengan di views.py
     }
 }
 
