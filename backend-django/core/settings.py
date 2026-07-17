@@ -86,7 +86,7 @@ STORAGES = {
 # CORS & CSRF
 CORS_ALLOW_ALL_ORIGINS = True 
 CSRF_TRUSTED_ORIGINS = [
-    'https://newt-shoes-project.up.railway.app', 
+    'https://newt-shoes-project-production.up.railway.app/', 
     'https://newt-shoes-backend.up.railway.app'
 ]
 
