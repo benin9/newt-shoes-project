@@ -14,7 +14,6 @@ const services = [
   { title: "Reglue", desc: "Merekatkan kembali bagian sole sepatu yang terlepas.", icon: "🧷" },
 ];
 
-// Animation Variants
 const fadeInUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const staggerContainer = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const cardAnimation = { hidden: { opacity: 0, y: 40, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1 } };
@@ -59,7 +58,9 @@ export default function ServicesPage() {
               </motion.div>
             ))
           ) : (
-            <p className="col-span-full text-center text-[#5c4a2f] mt-10">Maaf, layanan "{search}" tidak ditemukan.</p>
+            <p className="col-span-full text-center text-[#5c4a2f] mt-10">
+              Maaf, layanan &quot;{search}&quot; tidak ditemukan.
+            </p>
           )}
         </motion.div>
 
